@@ -1,5 +1,7 @@
 # Hysteretic Diffusion Model
 
+![Hysteretic Diffusion Model Hero](https://raw.githubusercontent.com/MetaphyKing/hysteretic-diffusion-model/main/assets/hero_title.jpg)
+
 **DEAR & Hysteretic Diffusion 3D Emotional Topography & Intervention Lab**
 
 Interactive WebGL visualization and quantitative simulation environment for mapping, analyzing, and intervening on affective manifolds. Projects 40-dimensional EmotionalTextureAnalyzer (ETA) vectors onto a golden-ratio (φ) dodecahedral manifold with score vector fields, hysteretic remanence dynamics, and topological bridging protocols.
@@ -42,6 +44,14 @@ Six conceived methods (M1–M6) were simulated over 500 longitudinal steps to el
 - Live 40D ETA cluster telemetry and convergence metrics
 - Layer toggles for score vectors, dodecahedral mesh, and flow particles
 
+## Media & Assets
+
+- Hero title image and looping video (16:9 cinematic, golden dodecahedron + cyan/amber score streams)
+- Figure 1: Intervention trajectories
+- Figure 2: Profile swings comparison
+- Emotionally healthy gradient vector graph
+- Full simulation scripts, telemetry CSV, and topological rehabilitation report in `docs/`
+
 ## Deployment
 
 This repository is configured for instant Vercel deployment as a static site.
@@ -53,7 +63,7 @@ cd hysteretic-diffusion-model
 npx vercel deploy --prod
 ```
 
-**Live Demo:** Deployed via Vercel (see project settings).
+**Live Demo:** https://hysteretic-diffusion-model.vercel.app
 
 ## Technical References
 
