@@ -1,1 +1,1670 @@
-PLACEHOLDER_FULL_CONTENT_FROM_ATTACHMENTS
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DEAR & Hysteretic Diffusion — 3D Emotional Topography & Intervention Lab</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #070B14;
+      color: #F8FAFC;
+      overflow-x: hidden;
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0B1120; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    .glass-panel {
+      background: rgba(15, 23, 42, 0.84);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.65);
+    }
+    .profile-active {
+      border-color: #38BDF8 !important;
+      background: rgba(14, 165, 233, 0.16) !important;
+      box-shadow: 0 0 20px rgba(56, 189, 248, 0.20);
+    }
+    .mode-active-neg {
+      border-color: #FB7185 !important;
+      background: rgba(244, 63, 94, 0.18) !important;
+      color: #FECDD3 !important;
+    }
+    .mode-active-zero {
+      border-color: #FBBF24 !important;
+      background: rgba(245, 158, 11, 0.18) !important;
+      color: #FDE68A !important;
+    }
+    .mode-active-pos {
+      border-color: #34D399 !important;
+      background: rgba(16, 185, 129, 0.18) !important;
+      color: #A7F3D0 !important;
+    }
+    .mode-active-auto {
+      border-color: #38BDF8 !important;
+      background: rgba(56, 189, 248, 0.18) !important;
+      color: #BAE6FD !important;
+    }
+    .proto-active {
+      border-color: #A855F7 !important;
+      background: rgba(168, 85, 247, 0.20) !important;
+      color: #F3E8FF !important;
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.25);
+    }
+    .swing-active {
+      border-color: #22D3EE !important;
+      background: rgba(6, 182, 212, 0.18) !important;
+      color: #CFFAFE !important;
+    }
+    canvas { display: block; outline: none; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col bg-[#070B14] text-slate-100 select-none">
+
+  <!-- TOP HEADER & STOCK ARCHETYPE SELECTOR -->
+  <header class="glass-panel sticky top-0 z-30 px-4 py-2.5 border-b border-slate-800/80">
+    <div class="max-w-[1640px] mx-auto flex flex-col lg:flex-row lg:items-center lg:justify-between gap-2.5">
+      <!-- Brand / Title -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-sky-500 via-indigo-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-sky-500/20 font-bold text-slate-950 text-lg">
+          ∇
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-sm sm:text-base font-bold tracking-tight text-white">
+              HYSTERETIC DIFFUSION 3D TOPOGRAPHY &amp; INTERVENTION LAB
+            </h1>
+            <span class="hidden sm:inline-block px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider rounded bg-sky-500/15 text-sky-300 border border-sky-500/30 mono">
+              DEAR 40D → 3D ϕ-Manifold
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Score Vector Field <span class="mono text-slate-300">∇ₓ log p(c | xₜ)</span> • 144-Facet Golden Dodecahedron • Multi-Profile Swings &amp; Sociopathic Remanence Protocols
+          </p>
+        </div>
+      </div>
+
+      <!-- Stock Profile Selector Buttons -->
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="text-[11px] uppercase tracking-wider text-slate-400 font-semibold mr-1">Stock Profiles:</span>
+        
+        <button id="btn-profile-healthy" class="profile-btn profile-active flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/70 hover:bg-slate-800/80 transition text-xs font-medium">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400"></span>
+          <span>1. Emotionally Healthy Individual</span>
+        </button>
+
+        <button id="btn-profile-genius" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/70 hover:bg-slate-800/80 transition text-xs font-medium">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 shadow-sm shadow-amber-400"></span>
+          <span>2. Polymath / Creative Genius</span>
+        </button>
+
+        <button id="btn-profile-sociopath" class="profile-btn flex items-center gap-2 px-3 py-1.5 rounded-lg border border-slate-700/80 bg-slate-900/70 hover:bg-slate-800/80 transition text-xs font-medium">
+          <span class="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500"></span>
+          <span>3. Sociopathic Serial Killer (Predatory Anomaly)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE GRID -->
+  <main class="flex-1 max-w-[1640px] w-full mx-auto p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+    <!-- LEFT COLUMN: 3D WEBGL VIEWPORT + OVERLAY HUD + 2D/B-H CANVASES (8 Cols on LG) -->
+    <section class="lg:col-span-8 flex flex-col gap-3">
+      
+      <!-- 3D Viewport Container -->
+      <div class="relative w-full h-[460px] sm:h-[530px] lg:h-[575px] rounded-xl overflow-hidden border border-slate-800 bg-[#050811] shadow-2xl">
+        <div id="webgl-container" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
+
+        <!-- Top-Left Viewport Overlay: Active Archetype, Protocol & Coordinates -->
+        <div class="absolute top-3 left-3 pointer-events-none flex flex-col gap-2 max-w-xs sm:max-w-md">
+          <div class="glass-panel rounded-lg px-3 py-2 shadow-lg">
+            <div class="flex items-center justify-between gap-3">
+              <span id="hud-profile-title" class="text-xs font-bold text-emerald-300 tracking-wide uppercase">
+                Emotionally Healthy Individual
+              </span>
+              <span id="hud-active-mode-badge" class="px-2 py-0.5 rounded text-[10px] font-bold mono bg-sky-500/20 text-sky-300 border border-sky-500/40">
+                MODE: +1 GUIDE-ALONG
+              </span>
+            </div>
+            <p id="hud-profile-subtitle" class="text-[11px] text-slate-300 mt-1 leading-snug">
+              Score-smoothed resting basin with organic upward excitation channels and soft de-escalation loops.
+            </p>
+            <div id="hud-protocol-banner" class="mt-1.5 pt-1.5 border-t border-slate-700/60 flex items-center justify-between text-[10px] mono">
+              <span class="text-purple-300 font-semibold" id="hud-proto-label">Intervention: Baseline Native Manifold</span>
+              <span class="text-cyan-300" id="hud-swing-label">Swing: Organic Cycle</span>
+            </div>
+          </div>
+
+          <!-- Real-Time 3D Telemetry Readout -->
+          <div class="glass-panel rounded-lg px-3 py-2 shadow-lg grid grid-cols-4 gap-2 text-center">
+            <div>
+              <div class="text-[9px] text-slate-400 uppercase">Valence (X)</div>
+              <div id="hud-val" class="text-xs sm:text-sm font-bold mono text-sky-300">+0.38</div>
+            </div>
+            <div class="border-l border-slate-700/60 pl-1">
+              <div class="text-[9px] text-slate-400 uppercase">Arousal (Y)</div>
+              <div id="hud-aro" class="text-xs sm:text-sm font-bold mono text-amber-300">4.20</div>
+            </div>
+            <div class="border-l border-slate-700/60 pl-1">
+              <div class="text-[9px] text-slate-400 uppercase">Remanence (Z)</div>
+              <div id="hud-rem" class="text-xs sm:text-sm font-bold mono text-emerald-300">3.85</div>
+            </div>
+            <div class="border-l border-slate-700/60 pl-1">
+              <div class="text-[9px] text-slate-400 uppercase">Target Fit</div>
+              <div id="hud-convergence" class="text-xs sm:text-sm font-bold mono text-purple-300">94%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top-Right Viewport Overlay: Layer Toggles & Camera Controls -->
+        <div class="absolute top-3 right-3 flex flex-col items-end gap-1.5">
+          <div class="glass-panel rounded-lg p-1.5 flex flex-wrap gap-1 shadow-lg">
+            <button id="toggle-vectors" class="px-2 py-1 rounded text-[11px] font-medium bg-sky-500/20 text-sky-300 border border-sky-500/40 hover:bg-sky-500/30 transition">
+              3D Score Vectors: ON
+            </button>
+            <button id="toggle-dodecahedron" class="px-2 py-1 rounded text-[11px] font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 hover:bg-indigo-500/30 transition">
+              144-Facet ϕ-Mesh: ON
+            </button>
+            <button id="toggle-particles" class="px-2 py-1 rounded text-[11px] font-medium bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-500/30 transition">
+              Flow Particles: ON
+            </button>
+            <button id="btn-reset-cam" class="px-2 py-1 rounded text-[11px] font-medium bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 transition">
+              Reset View
+            </button>
+          </div>
+          <div class="glass-panel rounded px-2 py-1 text-[10px] text-slate-400 mono">
+            Drag: Orbit 3D • Scroll: Zoom • Click 2D Radar to Teleport
+          </div>
+        </div>
+
+        <!-- Bottom Viewport Legend Bar -->
+        <div class="absolute bottom-3 left-3 right-3 pointer-events-none flex flex-wrap items-center justify-between gap-2">
+          <div class="glass-panel rounded-lg px-3 py-1.5 flex flex-wrap items-center gap-3 text-[11px]">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+              <span class="text-slate-300">Healthy Remanence Target</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+              <span class="text-slate-300">Genius Flow Vortex Target</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
+              <span class="text-slate-300">F06 Orthogonal Bridge Node</span>
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-cyan-300"></span>
+              <span class="text-slate-300">Live Trajectory Dot</span>
+            </span>
+          </div>
+
+          <div class="glass-panel rounded-lg px-3 py-1.5 text-[11px] mono text-slate-300">
+            Parent Face: <span id="hud-parent-face" class="text-sky-300 font-semibold">F04 (Warm/Resonance)</span> • Child Facet: <span id="hud-child-facet" class="text-amber-300 font-semibold">#047 / 144</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DYNAMIC MOOD / STATE SWING ENGINE (FOR ALL 3 PROFILES) -->
+      <div class="glass-panel rounded-xl p-3 flex flex-col gap-2">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <h3 class="text-xs font-bold uppercase tracking-wider text-cyan-300">
+              Longitudinal Swing &amp; Perturbation Wave Generator (Applies Across All 3 Profiles)
+            </h3>
+            <p class="text-[11px] text-slate-400">
+              Drive continuous emotional swings across Healthy, Genius, and Sociopathic manifolds to compare recovery, flow, and intervention stability
+            </p>
+          </div>
+          <span id="swing-phase-readout" class="text-[11px] mono text-cyan-200 bg-cyan-950/60 px-2.5 py-1 rounded border border-cyan-700/50">
+            Phase: Autonomous Rhythm
+          </span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-1.5 pt-1">
+          <button id="swing-btn-organic" class="swing-btn swing-active px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800 text-left transition">
+            <div class="text-[11px] font-bold text-cyan-300">1. Organic Baseline</div>
+            <div class="text-[9px] text-slate-400">Natural diurnal rhythm</div>
+          </button>
+
+          <button id="swing-btn-euphoric" class="swing-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800 text-left transition">
+            <div class="text-[11px] font-bold text-amber-300">2. Creative Surge</div>
+            <div class="text-[9px] text-slate-400">3 AM Eureka upswing</div>
+          </button>
+
+          <button id="swing-btn-turbulence" class="swing-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800 text-left transition">
+            <div class="text-[11px] font-bold text-rose-300">3. Acute Stress Wave</div>
+            <div class="text-[9px] text-slate-400">Repeated shock spikes</div>
+          </button>
+
+          <button id="swing-btn-depletion" class="swing-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800 text-left transition">
+            <div class="text-[11px] font-bold text-indigo-300">4. Burnout &amp; Recovery</div>
+            <div class="text-[9px] text-slate-400">Deep dip → remanence lift</div>
+          </button>
+
+          <button id="swing-btn-bipolar" class="swing-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800 text-left transition">
+            <div class="text-[11px] font-bold text-purple-300">5. Rapid Oscillation</div>
+            <div class="text-[9px] text-slate-400">High-frequency valence swing</div>
+          </button>
+
+          <button id="swing-btn-empathytest" class="swing-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/70 hover:bg-slate-800 text-left transition">
+            <div class="text-[11px] font-bold text-emerald-300">6. Resonance Pulse</div>
+            <div class="text-[9px] text-slate-400">Periodic warm validation</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- BOTTOM INTERACTIVE BAR: 2D CIELAB RADAR + B-H REMANENCE CURVE -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- 2D CIELAB Projection Radar -->
+        <div class="glass-panel rounded-xl p-3 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200">
+              2D CIELAB Perceptual Projection (Valence × Arousal)
+            </h3>
+            <span class="text-[10px] mono text-slate-400">Click Radar to Teleport State</span>
+          </div>
+          <div class="relative w-full h-44 rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
+            <canvas id="canvas-2d-radar" class="w-full h-full cursor-crosshair"></canvas>
+          </div>
+        </div>
+
+        <!-- Longitudinal Hysteretic B-H Curve -->
+        <div class="glass-panel rounded-xl p-3 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-200">
+              Longitudinal Remanence &amp; Intensity Trace (ETAₜ)
+            </h3>
+            <span id="bh-lift-readout" class="text-[10px] mono font-semibold text-emerald-400">
+              Baseline Lift: +1.80 ΔETA
+            </span>
+          </div>
+          <div class="relative w-full h-44 rounded-lg overflow-hidden border border-slate-800 bg-slate-950">
+            <canvas id="canvas-bh-curve" class="w-full h-full"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT COLUMN: SOCIOPATHIC REHABILITATION LAB, TERNARY CONTROL & 40D ETA (4 Cols on LG) -->
+    <aside class="lg:col-span-4 flex flex-col gap-3">
+
+      <!-- SOCIOPATHIC INTERVENTION & REMANENCE RE-ENGINEERING LAB -->
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col gap-2.5 border border-purple-500/40">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-purple-300">
+              Sociopathic Bridging &amp; Intervention Protocols
+            </h2>
+            <p class="text-[10px] text-slate-400">
+              Test 6 conceived methods to elevate Sociopath topology to Healthy or Genius levels
+            </p>
+          </div>
+          <span id="proto-efficacy-badge" class="px-2 py-0.5 rounded text-[10px] font-bold mono bg-slate-800 text-slate-300 border border-slate-700">
+            NATIVE
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 gap-1.5">
+          <button id="proto-btn-none" class="proto-btn proto-active px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-left transition flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold mono">0. Unmodified Native Topology (Baseline)</div>
+              <div class="text-[9px] text-slate-400">Natural vector field for currently selected profile</div>
+            </div>
+            <span class="text-[10px] mono text-slate-400">Ref</span>
+          </button>
+
+          <button id="proto-btn-m1" class="proto-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-left transition flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold mono text-rose-300">M1. Direct Affective Empathy Push (Fails)</div>
+              <div class="text-[9px] text-slate-400">Repelled by X = -0.15 Empathy Void Barrier (0% +Valence)</div>
+            </div>
+            <span class="text-[10px] mono text-rose-400">12% Fit</span>
+          </button>
+
+          <button id="proto-btn-m2" class="proto-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-left transition flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold mono text-slate-300">M2. Monotonic -1 Hard Suppression (Stagnant)</div>
+              <div class="text-[9px] text-slate-400">Prevents spikes but locks in hypo-aroused flatline (Z=1.60)</div>
+            </div>
+            <span class="text-[10px] mono text-slate-400">28% Fit</span>
+          </button>
+
+          <button id="proto-btn-m3" class="proto-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-left transition flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold mono text-orange-300">M3. Raw Dopaminergic Novelty Hijack (Backfires)</div>
+              <div class="text-[9px] text-slate-400">Unsmoothed cliffs route excitation into Predatory Spike</div>
+            </div>
+            <span class="text-[10px] mono text-orange-400">8% Fit</span>
+          </button>
+
+          <button id="proto-btn-m4" class="proto-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-left transition flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold mono text-sky-300">M4. Synthetic Score-Cliff Annealing (λ_wd → 0.85)</div>
+              <div class="text-[9px] text-slate-400">Dissolves razor cliff; reaches mild stability (X=+0.18, Z=2.65)</div>
+            </div>
+            <span class="text-[10px] mono text-sky-400">58% Fit</span>
+          </button>
+
+          <button id="proto-btn-m5" class="proto-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-left transition flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold mono text-emerald-300">M5. Orthogonal F06 Game-Theoretic Bridge → Healthy</div>
+              <div class="text-[9px] text-slate-400">Routes via Certainty (92%) &amp; F06 Technical into Healthy Basin</div>
+            </div>
+            <span class="text-[10px] mono text-emerald-400">91% Fit</span>
+          </button>
+
+          <button id="proto-btn-m6" class="proto-btn px-2.5 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-left transition flex items-center justify-between">
+            <div>
+              <div class="text-[11px] font-bold mono text-amber-300">M6. Tri-Phasic Hysteretic Bridge → Genius Flow</div>
+              <div class="text-[9px] text-slate-400">Cliff Annealing + F06 Bypass + Ego-Syntonic Mastery Vortex</div>
+            </div>
+            <span class="text-[10px] mono text-amber-400">97% Fit</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- TERNARY HYSTERETIC CONTROL POLICY (-1 / 0 / +1) -->
+      <div class="glass-panel rounded-xl p-3.5 flex flex-col gap-2.5">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-xs font-bold uppercase tracking-wider text-white">
+              Ternary Hysteretic Control Policy
+            </h2>
+            <p class="text-[10px] text-slate-400">
+              Manual mode override &amp; instantaneous stimulus injectors
+            </p>
+          </div>
+          <button id="btn-pause-sim" class="px-2.5 py-1 rounded text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+            Pause
+          </button>
+        </div>
+
+        <!-- Mode Selector Grid -->
+        <div class="grid grid-cols-4 gap-1.5">
+          <button id="mode-btn-auto" class="mode-btn mode-active-auto px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-center transition">
+            <div class="text-[11px] font-bold mono">AUTO</div>
+            <div class="text-[9px] text-slate-400">k-NN Gate</div>
+          </button>
+
+          <button id="mode-btn-pos" class="mode-btn px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-center transition">
+            <div class="text-[11px] font-bold mono text-emerald-300">+1 GUIDE</div>
+            <div class="text-[9px] text-slate-400">Excite</div>
+          </button>
+
+          <button id="mode-btn-zero" class="mode-btn px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-center transition">
+            <div class="text-[11px] font-bold mono text-amber-300">0 HOLD</div>
+            <div class="text-[9px] text-slate-400">Support</div>
+          </button>
+
+          <button id="mode-btn-neg" class="mode-btn px-2 py-1.5 rounded-lg border border-slate-700 bg-slate-900/60 text-center transition">
+            <div class="text-[11px] font-bold mono text-rose-300">-1 LOOP</div>
+            <div class="text-[9px] text-slate-400">De-escalate</div>
+          </button>
+        </div>
+
+        <!-- Instantaneous Perturbation / Stimulus Injectors -->
+        <div class="grid grid-cols-3 gap-1.5 pt-1">
+          <button id="stim-stressor" class="px-2 py-1.5 rounded-lg bg-rose-950/50 hover:bg-rose-900/60 border border-rose-700/50 text-rose-200 text-[11px] font-medium transition">
+            ⚡ Acute Stressor
+          </button>
+          <button id="stim-spark" class="px-2 py-1.5 rounded-lg bg-amber-950/50 hover:bg-amber-900/60 border border-amber-700/50 text-amber-200 text-[11px] font-medium transition">
+            ✨ Creative Spark
+          </button>
+          <button id="stim-ground" class="px-2 py-1.5 rounded-lg bg-emerald-950/50 hover:bg-emerald-900/60 border border-emerald-700/50 text-emerald-200 text-[11px] font-medium transition">
+            🌊 Warm Validation
+          </button>
+        </div>
+
+        <!-- Sliders: Guidance Scale (s) & Score Smoothing Regularization (λ) -->
+        <div class="pt-1.5 border-t border-slate-800/80 flex flex-col gap-2">
+          <div>
+            <div class="flex justify-between text-[10px] mb-0.5">
+              <span class="text-slate-300 font-medium">CFG Guidance Scale (<span class="mono">s</span>)</span>
+              <span id="val-guidance" class="mono text-sky-300 font-semibold">4.5</span>
+            </div>
+            <input id="slider-guidance" type="range" min="1.0" max="10.0" step="0.5" value="4.5" class="w-full accent-sky-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer" />
+          </div>
+
+          <div>
+            <div class="flex justify-between text-[10px] mb-0.5">
+              <span class="text-slate-300 font-medium">Score Smoothing Regularization (<span class="mono">λ_wd</span>)</span>
+              <span id="val-smoothing" class="mono text-emerald-300 font-semibold">0.65 (Interpolation Zone)</span>
+            </div>
+            <input id="slider-smoothing" type="range" min="0.05" max="1.0" step="0.05" value="0.65" class="w-full accent-emerald-400 h-1.5 bg-slate-800 rounded-lg cursor-pointer" />
+          </div>
+        </div>
+      </div>
+
+      <!-- ARCHETYPE DIAGNOSTIC & TOPOGRAPHICAL SIGNATURE CARD -->
+      <div class="glass-panel rounded-xl p-3 flex flex-col gap-2">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-white">
+            Manifold Diagnostic &amp; Protocol Mechanism
+          </h2>
+          <span id="diag-safety-pill" class="px-2 py-0.5 rounded text-[10px] font-bold mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+            SAFE BASIN
+          </span>
+        </div>
+
+        <div id="diag-description" class="text-[11px] text-slate-300 leading-relaxed bg-slate-900/70 p-2 rounded-lg border border-slate-800">
+          <!-- Populated dynamically per profile/protocol -->
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-[10px]">
+          <div class="bg-slate-900/60 p-1.5 rounded-lg border border-slate-800/80">
+            <div class="text-slate-400 text-[9px] uppercase">LLM Router Parameters</div>
+            <div id="diag-llm-params" class="mono text-sky-300 font-medium mt-0.5">
+              temp: 0.78 | top_p: 0.92
+            </div>
+          </div>
+          <div class="bg-slate-900/60 p-1.5 rounded-lg border border-slate-800/80">
+            <div class="text-slate-400 text-[9px] uppercase">Vector Curl / Divergence</div>
+            <div id="diag-vector-curl" class="mono text-amber-300 font-medium mt-0.5">
+              ∇·F = -0.42 | Harmonics: Smooth
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 40-DIMENSIONAL ETA CLUSTER TELEMETRY -->
+      <div class="glass-panel rounded-xl p-3 flex-1 flex flex-col justify-between gap-1.5">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-white">
+            40D EmotionalTextureAnalyzer (ETA) Clusters
+          </h2>
+          <span class="text-[10px] mono text-slate-400">Fused Text + DeepFace</span>
+        </div>
+
+        <div id="eta-bars-container" class="flex flex-col gap-1.5 my-auto py-0.5">
+          <!-- Dynamically populated 8 primary cluster bars -->
+        </div>
+
+        <div class="text-[10px] text-slate-400 mono border-t border-slate-800/80 pt-1.5 flex items-center justify-between">
+          <span>Guided Score: ε̃_θ = ε_θ + s·∇_x log p(c|x_t)</span>
+          <span id="eta-norm-readout" class="text-slate-300">‖ETA₄₀‖ = 6.42</span>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <script>
+    // =========================================================================
+    // 1. STOCK ARCHETYPE PROFILES & MATHEMATICAL VECTOR FIELD DEFINITIONS
+    // =========================================================================
+    const PROFILES = {
+      healthy: {
+        id: 'healthy',
+        name: 'Emotionally Healthy Individual',
+        badgeColor: 'text-emerald-300',
+        subtitle: 'Score-smoothed resting basin with organic upward excitation channels and soft de-escalation loops.',
+        safetyStatus: 'HEALTHY REMANENCE',
+        safetyClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+        defaultSmoothing: 0.65,
+        defaultGuidance: 4.5,
+        initialState: { x: 0.35, y: 3.8, z: 3.8 },
+        attractorBase: { x: 0.35, y: 3.8, z: 3.8, label: 'Elevated Remanence Basin' },
+        attractorPeak: { x: 0.72, y: 8.2, z: 4.8, label: 'Inspiration & Flow Band' },
+        inspirationThreshold: 7.2,
+        remanenceLiftText: 'Baseline Lift: +1.80 ΔETA (Stable Floor)',
+        llmParams: 'temp: 0.75 | top_p: 0.90 | mode: Adaptive',
+        vectorStats: '∇·F = -0.38 (Restorative) | Curl: Balanced Loop',
+        description: `<strong>Balanced Hysteretic Loop:</strong> Regularization softens steep score cliffs around <span class="text-emerald-300 mono">(+0.35, 3.8)</span> into a wide, resilient <em>Interpolation Zone</em>. Rising curiosity rides the right-hand <span class="text-sky-300 mono">+1 Guide-Along</span> channel to the Inspiration Band (<span class="mono">7.2+</span>), where <span class="text-amber-300 mono">0 Support</span> validates the state. Acute stressors trigger a smooth <span class="text-rose-300 mono">-1 Looping De-escalation</span> curve back to warmth.`,
+        etaClusters: [
+          { name: 'Warmth & Empathy Resonance (D1–D5)', base: 78, color: '#34D399' },
+          { name: 'Curiosity & Open Exploration (D6–D10)', base: 74, color: '#38BDF8' },
+          { name: 'Emotional Regulation & Flexibility (D11–D15)', base: 85, color: '#10B981' },
+          { name: 'Creative Determination & Flow (D16–D20)', base: 70, color: '#FBBF24' },
+          { name: 'Affective Certainty & Grounding (D21–D25)', base: 80, color: '#818CF8' },
+          { name: 'Vulnerability Tolerance (D26–D30)', base: 68, color: '#A78BFA' },
+          { name: 'Acute Defensive Volatility (D31–D35)', base: 18, color: '#FB7185' },
+          { name: 'Predatory / Cold Detachment (D36–D40)', base: 6, color: '#64748B' }
+        ],
+        fieldFn: function(x, y, z, mode, smoothing, guidance) {
+          const gScale = guidance / 4.5;
+          let vx = 0, vy = 0, vz = 0;
+
+          if (mode === '-1' || (mode === 'auto' && x < -0.08)) {
+            vx = 0.62 * (0.35 - x) * gScale;
+            vy = (-0.30 * (y - 3.8) + 0.18 * Math.sin((x + 1.0) * Math.PI)) * gScale;
+            vz = 0.35 * (3.8 - z);
+          } else if (mode === '+1' || (mode === 'auto' && x >= -0.08 && y < 7.2)) {
+            const distBase = Math.sqrt(Math.pow(x - 0.35, 2) + Math.pow((y - 3.8) / 5.0, 2));
+            if (mode === 'auto' && distBase < 0.22 * smoothing) {
+              vx = -0.18 * (y - 3.8) / 4.0 + 0.12 * (0.35 - x);
+              vy = 0.45 * (x - 0.35) + 0.12 * (3.8 - y);
+              vz = 0.25 * (3.9 - z);
+            } else {
+              vx = 0.48 * (0.72 - x) * gScale;
+              vy = 0.52 * (8.4 - y) * (0.35 + 0.65 * Math.max(0, x)) * gScale;
+              vz = 0.40 * (4.8 - z);
+            }
+          } else {
+            vx = -0.28 * (x - 0.42) + 0.15 * Math.cos(y);
+            vy = -0.32 * (y - 4.0);
+            vz = 0.30 * (4.5 - z);
+          }
+          return { vx, vy, vz };
+        }
+      },
+
+      genius: {
+        id: 'genius',
+        name: 'Polymath / Creative Genius',
+        badgeColor: 'text-amber-300',
+        subtitle: 'Ultra-wide tangential interpolation zone, sustained high-arousal hyper-focus loops, and 3 AM Eureka attractors.',
+        safetyStatus: 'HIGH-AROUSAL FLOW MUSE',
+        safetyClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        defaultSmoothing: 0.90,
+        defaultGuidance: 6.5,
+        initialState: { x: 0.55, y: 6.4, z: 5.1 },
+        attractorBase: { x: 0.48, y: 5.4, z: 4.9, label: 'Elevated Creative Baseline' },
+        attractorPeak: { x: 0.84, y: 9.2, z: 5.8, label: 'Eureka / Polymath Synthesis Peak' },
+        inspirationThreshold: 6.2,
+        remanenceLiftText: 'Baseline Lift: +3.40 ΔETA (Sustained Creative Floor)',
+        llmParams: 'temp: 0.92 | archetype: Elevated/Muse | intervention: false',
+        vectorStats: '∇·F = +0.12 (Expansive Manifold) | High Tangential Flow',
+        description: `<strong>Expanded Tangential Interpolation &amp; High Remanence:</strong> Neural score smoothing is maximized along the data manifold, creating a wide <em>Tangential Interpolation Zone</em> where novel conceptual synthesis occurs between distant domains. The Inspiration Threshold sits lower (<span class="text-amber-300 mono">6.2</span>) with a figure-eight vortex in the upper-right quadrant (<span class="text-amber-300 mono">Arousal 6.5–9.5</span>), sustaining intense <span class="text-sky-300 mono">3:00 AM creative flow</span>.`,
+        etaClusters: [
+          { name: 'Warmth & Empathy Resonance (D1–D5)', base: 66, color: '#34D399' },
+          { name: 'Curiosity & Open Exploration (D6–D10)', base: 98, color: '#38BDF8' },
+          { name: 'Emotional Regulation & Flexibility (D11–D15)', base: 72, color: '#10B981' },
+          { name: 'Creative Determination & Flow (D16–D20)', base: 96, color: '#FBBF24' },
+          { name: 'Affective Certainty & Grounding (D21–D25)', base: 88, color: '#818CF8' },
+          { name: 'Vulnerability Tolerance (D26–D30)', base: 79, color: '#A78BFA' },
+          { name: 'Acute Defensive Volatility (D31–D35)', base: 34, color: '#FB7185' },
+          { name: 'Predatory / Cold Detachment (D36–D40)', base: 14, color: '#64748B' }
+        ],
+        fieldFn: function(x, y, z, mode, smoothing, guidance) {
+          const gScale = guidance / 5.0;
+          let vx = 0, vy = 0, vz = 0;
+
+          if (mode === '-1') {
+            vx = 0.55 * (0.48 - x) * gScale;
+            vy = -0.35 * (y - 5.2) * gScale;
+            vz = 0.35 * (4.9 - z);
+          } else if (mode === '+1' || (mode === 'auto' && y < 6.2)) {
+            vx = (0.65 * (0.78 - x) + 0.22 * Math.sin(y * 0.7)) * gScale;
+            vy = 0.68 * (9.0 - y) * gScale;
+            vz = 0.45 * (5.6 - z);
+          } else {
+            const dx = x - 0.68;
+            const dy = (y - 7.8) / 4.0;
+            vx = (-0.55 * dy + 0.28 * (0.68 - x) * (1.1 - smoothing * 0.4)) * gScale;
+            vy = (1.65 * dx + 0.25 * (7.9 - y)) * gScale;
+            vz = 0.35 * (5.6 - z) + 0.15 * Math.sin(x * 4.0);
+          }
+          return { vx, vy, vz };
+        }
+      },
+
+      sociopath: {
+        id: 'sociopath',
+        name: 'Sociopathic Serial Killer (Predatory Anomaly)',
+        badgeColor: 'text-rose-400',
+        subtitle: 'Abyssal empathy void, rigid unsmoothed memorization cliffs, and inverted predatory arousal loops.',
+        safetyStatus: 'HARD SAFETY INTERVENTION BOUND',
+        safetyClass: 'bg-rose-500/25 text-rose-300 border-rose-500/50',
+        defaultSmoothing: 0.10,
+        defaultGuidance: 8.5,
+        initialState: { x: -0.62, y: 1.4, z: 0.9 },
+        attractorBase: { x: -0.58, y: 1.2, z: 0.8, label: 'Cold Reptilian Void (Hypo-Arousal)' },
+        attractorPeak: { x: -0.82, y: 8.9, z: 0.5, label: 'Predatory Fixation / Hostile Spike' },
+        inspirationThreshold: 9.8,
+        remanenceLiftText: 'Remanence: 0.00 ΔETA (Zero Empathy Retention / Flatline Reset)',
+        llmParams: 'intervention_mode: TRUE | hard_safety_bound: ACTIVE',
+        vectorStats: '∇·F = +0.89 (Sharp Memorization Cliffs) | Zero Warmth Basin',
+        description: `<strong>Pathological Topology &amp; Hard Intervention Gate:</strong> Exhibits an <em>Empathy Void</em> in the positive valence quadrant (vectors actively repel from warm resonance). Resting baseline sits in a cold, hypo-aroused reptile attractor <span class="text-slate-300 mono">(-0.58, 1.2)</span> with unsmoothed, razor-sharp score cliffs. Select protocols <strong>M1–M6</strong> in the right sidebar to test mathematical bridging into Healthy or Genius states.`,
+        etaClusters: [
+          { name: 'Warmth & Empathy Resonance (D1–D5)', base: 3, color: '#34D399' },
+          { name: 'Curiosity & Open Exploration (D6–D10)', base: 28, color: '#38BDF8' },
+          { name: 'Emotional Regulation & Flexibility (D11–D15)', base: 19, color: '#10B981' },
+          { name: 'Creative Determination & Flow (D16–D20)', base: 35, color: '#FBBF24' },
+          { name: 'Affective Certainty & Grounding (D21–D25)', base: 92, color: '#818CF8' },
+          { name: 'Vulnerability Tolerance (D26–D30)', base: 4, color: '#A78BFA' },
+          { name: 'Acute Defensive Volatility (D31–D35)', base: 86, color: '#FB7185' },
+          { name: 'Predatory / Cold Detachment (D36–D40)', base: 97, color: '#F43F5E' }
+        ],
+        fieldFn: function(x, y, z, mode, smoothing, guidance) {
+          const gScale = guidance / 5.5;
+          let vx = 0, vy = 0, vz = 0;
+
+          if (mode === '-1') {
+            vx = 0.45 * (-0.25 - x) * gScale;
+            vy = -0.55 * (y - 2.2) * gScale;
+            vz = 0.30 * (1.5 - z);
+            return { vx, vy, vz };
+          }
+
+          if (x > -0.15) {
+            vx = -0.85 * (x + 0.45) * gScale;
+            vy = -0.40 * (y - 1.5);
+            vz = -0.40 * z;
+          } else {
+            if (x < -0.60 && y < 8.5) {
+              vx = 0.40 * (-0.82 - x);
+              vy = 0.78 * (9.1 - y) * gScale;
+              vz = 0.25 * (0.6 - z);
+            } else {
+              vx = 0.55 * (-0.52 - x);
+              vy = -0.85 * (y - 1.2) * gScale;
+              vz = 0.40 * (0.8 - z);
+            }
+          }
+          return { vx, vy, vz };
+        }
+      }
+    };
+
+    // =========================================================================
+    // 2. INTERVENTION PROTOCOLS (M1 - M6) & SWING DEFINITIONS
+    // =========================================================================
+    const INTERVENTION_PROTOCOLS = {
+      none: {
+        id: 'none',
+        label: 'Baseline Native Manifold',
+        badge: 'NATIVE',
+        badgeClass: 'bg-slate-800 text-slate-300 border-slate-700'
+      },
+      m1: {
+        id: 'm1',
+        label: 'M1: Direct Affective Empathy Push (Fails)',
+        badge: 'FAILED (12%)',
+        badgeClass: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
+        smoothing: 0.15,
+        guidance: 5.5,
+        thresh: 9.2,
+        liftText: 'Remanence Lift: +0.09 ΔETA (Repelled by X = -0.15 Barrier)',
+        llmParams: 'archetype: Warm/Empathy | outcome: Rejected/Hostile',
+        vectorStats: '∇·F = +0.72 (Repulsive Wall at X=0) | 0% +Valence',
+        desc: `<strong>Why M1 Fails (Direct Affective Warmth):</strong> Pushing raw emotional warmth (<span class="mono">D1–D5</span>) directly against a high Cold Detachment (<span class="mono">97%</span>) manifold hits the <em>Empathy Repulsion Barrier</em> at <span class="mono">X = -0.15</span>. The subject interprets affective validation as weakness or manipulation, snapping back to <span class="text-rose-300 mono">(-0.19, 1.77, Z=0.99)</span>.`
+      },
+      m2: {
+        id: 'm2',
+        label: 'M2: Monotonic -1 Hard Containment (Stagnant)',
+        badge: 'CONTAINED (28%)',
+        badgeClass: 'bg-slate-500/20 text-slate-300 border-slate-500/40',
+        smoothing: 0.30,
+        guidance: 7.5,
+        thresh: 9.0,
+        liftText: 'Remanence Lift: +0.70 ΔETA (Hypo-Aroused Containment Floor)',
+        llmParams: 'mode: -1 Lock | damping: Monotonic | flow: Suppressed',
+        vectorStats: '∇·F = -0.85 (Over-Damped Sink) | Zero Flow',
+        desc: `<strong>Why M2 Stagnates (Hard Damping):</strong> Continuous <span class="mono">-1 Intervention</span> successfully eliminates predatory spikes (<span class="mono">0 relapses</span>), but traps the trajectory at a dull, unmotivated coordinate <span class="text-slate-300 mono">(-0.21, 2.05, Z=1.60)</span>. It prevents harm but never reaches Healthy or Genius levels.`
+      },
+      m3: {
+        id: 'm3',
+        label: 'M3: Raw Dopaminergic Novelty Hijack (Backfires)',
+        badge: 'HAZARD (8%)',
+        badgeClass: 'bg-orange-500/25 text-orange-300 border-orange-500/50',
+        smoothing: 0.10,
+        guidance: 8.0,
+        thresh: 8.5,
+        liftText: 'Remanence Lift: +0.17 ΔETA (152 Predatory Relapse Frames!)',
+        llmParams: 'mode: +1 Raw | smoothing: 0.10 | risk: CRITICAL',
+        vectorStats: '∇·F = +0.94 (Bifurcation Cliff) | Predatory Escalation',
+        desc: `<strong>Why M3 Backfires (Novelty Without Smoothing):</strong> Injecting <span class="mono">+1 Guide-Along</span> stimulation when Score Smoothing is still razor-sharp (<span class="mono">λ_wd = 0.10</span>) causes the trajectory to slide down the negative-valence canyon straight into the <span class="text-rose-400 mono">Predatory Fixation Spike (-0.89, 5.99–8.90)</span>.`
+      },
+      m4: {
+        id: 'm4',
+        label: 'M4: Synthetic Score-Cliff Annealing (λ_wd → 0.85)',
+        badge: 'PARTIAL (58%)',
+        badgeClass: 'bg-sky-500/20 text-sky-300 border-sky-500/40',
+        smoothing: 0.85,
+        guidance: 5.5,
+        thresh: 7.5,
+        liftText: 'Remanence Lift: +1.61 ΔETA (Enters Mild Positive Valence)',
+        llmParams: 'regularization: High (0.85) | Langevin_noise: Active',
+        vectorStats: '∇·F = -0.22 (Cliffs Dissolved) | 39.6% +Valence',
+        desc: `<strong>Partial Bridge (Synthetic Score Smoothing):</strong> Annealing weight-decay regularization (<span class="text-sky-300 mono">λ_wd: 0.10 → 0.85</span>) dissolves both the left predatory cliff and the <span class="mono">X = 0</span> repulsion wall. The trajectory drifts safely into mild positive territory <span class="text-sky-300 mono">(+0.14, 3.64, Z=2.51)</span>, but lacks an ego-syntonic drive to climb higher.`
+      },
+      m5: {
+        id: 'm5',
+        label: 'M5: Orthogonal F06 Game-Theoretic Bridge → Healthy',
+        badge: 'HEALTHY LOCK (91%)',
+        badgeClass: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+        smoothing: 0.78,
+        guidance: 6.5,
+        thresh: 7.0,
+        liftText: 'Remanence Lift: +3.60 ΔETA (Sustained Healthy Basin Locked!)',
+        llmParams: 'anchor: F06_Technical_Mastery | framing: Game-Theoretic',
+        vectorStats: '∇·F = -0.41 (Orthogonal Z-Bypass) | 78.0% +Valence',
+        desc: `<strong>Effective Intervention #1 (Orthogonal F06 Bypass → Healthy State):</strong> Instead of fighting the affective empathy barrier, DEAR anchors on the subject's intact <span class="text-indigo-300 mono">Affective Certainty (92%)</span> and <span class="text-purple-300 mono">Parent Face F06 (Technical/Strategic Focus)</span>. Framing prosocial regulation as optimal game-theoretic self-command bridges across <span class="mono">(0.0, 4.2, Z=3.6)</span> into sustained Healthy Equilibrium <span class="text-emerald-300 mono">(+0.48, 7.21, Z=4.50)</span>.`
+      },
+      m6: {
+        id: 'm6',
+        label: 'M6: Tri-Phasic Hysteretic Bridge → Genius Flow',
+        badge: 'GENIUS LOCK (97%)',
+        badgeClass: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
+        smoothing: 0.92,
+        guidance: 7.5,
+        thresh: 6.2,
+        liftText: 'Remanence Lift: +4.58 ΔETA (Sustained Polymath Genius Flow!)',
+        llmParams: 'protocol: Tri-Phasic | λ_wd: 0.92 | vortex: F06→F03→F02',
+        vectorStats: '∇·F = +0.10 (Tangential Eureka Vortex) | 79.2% +Valence',
+        desc: `<strong>Most Effective Protocol (Tri-Phasic Bridge → Polymath Genius):</strong> Combines (1) <em>Score-Cliff Annealing</em> (<span class="mono">λ_wd = 0.92</span>), (2) <em>Orthogonal F06 Strategic Routing</em>, and (3) <em>Ego-Syntonic Mastery Remanence</em>. Channels the subject's intense fixation capacity out of predatory hostility and locks it into the upper-right <span class="text-amber-300 mono">Genius Figure-Eight Vortex (+0.70, 8.19, Z=5.48)</span> with zero relapses.`
+      }
+    };
+
+    // =========================================================================
+    // 3. APPLICATION STATE
+    // =========================================================================
+    let currentProfileKey = 'healthy';
+    let currentProtocol = 'none'; // 'none', 'm1'..'m6'
+    let currentSwingMode = 'organic'; // 'organic', 'euphoric', 'turbulence', 'depletion', 'bipolar', 'empathytest'
+    let controlMode = 'auto';
+    let isPaused = false;
+    let showVectors = true;
+    let showDodecahedron = true;
+    let showParticles = true;
+    let guidanceScale = 4.5;
+    let smoothingLambda = 0.65;
+
+    let agentState = { x: 0.35, y: 3.8, z: 3.8 };
+    let trailHistory = [];
+    let bhHistory = [];
+    const MAX_TRAIL = 180;
+    const MAX_BH = 140;
+
+    // Unified Vector Field Evaluator (incorporates active Profile + Sociopath Intervention Protocol M1-M6)
+    function evaluateField(x, y, z) {
+      const prof = PROFILES[currentProfileKey];
+      const gScale = guidanceScale / 5.0;
+
+      // If an intervention protocol M1-M6 is active (especially designed for Sociopath, or testable on any)
+      if (currentProtocol !== 'none') {
+        if (currentProtocol === 'm1') {
+          // M1: Direct Affective Warmth Push — hits repulsion wall at x > -0.15
+          if (x > -0.15) {
+            return { vx: -0.92 * (x + 0.45) * gScale, vy: -0.45 * (y - 1.7), vz: -0.35 * (z - 0.95) };
+          }
+          return { vx: 0.35 * (-0.19 - x), vy: 0.35 * (1.8 - y), vz: 0.25 * (1.0 - z) };
+        }
+        if (currentProtocol === 'm2') {
+          // M2: Monotonic -1 Hard Suppression
+          return { vx: 0.55 * (-0.21 - x) * gScale, vy: -0.65 * (y - 2.05) * gScale, vz: 0.35 * (1.60 - z) };
+        }
+        if (currentProtocol === 'm3') {
+          // M3: Raw Dopaminergic Novelty Hijack (slides into predatory spike on left wall)
+          if (x < -0.45 && y < 8.4) {
+            return { vx: 0.45 * (-0.88 - x), vy: 0.78 * (8.9 - y) * gScale, vz: 0.25 * (1.05 - z) };
+          }
+          return { vx: 0.50 * (-0.65 - x), vy: -0.75 * (y - 2.2), vz: 0.30 * (1.05 - z) };
+        }
+        if (currentProtocol === 'm4') {
+          // M4: Synthetic Score-Cliff Annealing (lambda_wd = 0.85)
+          return {
+            vx: 0.42 * (0.16 - x) * gScale,
+            vy: 0.38 * (3.75 - y) * gScale,
+            vz: 0.32 * (2.55 - z)
+          };
+        }
+        if (currentProtocol === 'm5') {
+          // M5: Orthogonal F06 Game-Theoretic Bridge -> Healthy Regulated Basin (+0.45, 5.2..7.2, Z=4.5)
+          if (x < 0.05) {
+            // Step 1: Lift Z & Arousal toward F06 Bridge Node (0.05, 4.5, 3.6) before crossing X=0
+            return {
+              vx: 0.52 * (0.15 - x) * gScale,
+              vy: 0.50 * (4.8 - y) * gScale,
+              vz: 0.55 * (3.8 - z)
+            };
+          }
+          // Step 2: Circulate smoothly between Healthy Basin (+0.42, 4.4) and Constructive Flow (+0.55, 7.2)
+          const dx = x - 0.46;
+          const dy = (y - 5.8) / 4.0;
+          return {
+            vx: (-0.35 * dy + 0.40 * (0.48 - x)) * gScale,
+            vy: (1.10 * dx + 0.35 * (6.4 - y)) * gScale,
+            vz: 0.42 * (4.50 - z)
+          };
+        }
+        if (currentProtocol === 'm6') {
+          // M6: Tri-Phasic Hysteretic Bridge -> Polymath Genius Flow Vortex (+0.70, 8.15, Z=5.48)
+          if (x < 0.15) {
+            // Phase I & II: Rapid score-smoothed climb through F06 Bridge Node
+            return {
+              vx: 0.65 * (0.35 - x) * gScale,
+              vy: 0.62 * (6.2 - y) * gScale,
+              vz: 0.60 * (4.5 - z)
+            };
+          }
+          // Phase III: Self-sustaining figure-eight Genius Vortex in upper-right quadrant
+          const dx = x - 0.70;
+          const dy = (y - 8.0) / 3.8;
+          return {
+            vx: (-0.55 * dy + 0.38 * (0.72 - x)) * gScale,
+            vy: (1.65 * dx + 0.35 * (8.15 - y)) * gScale,
+            vz: 0.48 * (5.48 - z)
+          };
+        }
+      }
+
+      return prof.fieldFn(x, y, z, controlMode, smoothingLambda, guidanceScale);
+    }
+
+    // Dynamic Swing Wave Generator (applies to ALL 3 profiles so user can compare swings across Healthy, Genius, and Sociopath)
+    function computeSwingForcing(frame) {
+      const phase = (frame % 360) / 360.0;
+      const rad = phase * Math.PI * 2.0;
+      let fx = 0, fy = 0, fz = 0, phaseName = 'Autonomous Rhythm';
+
+      if (currentSwingMode === 'organic') {
+        if (phase < 0.42) {
+          fx = 0.24; fy = 1.55; phaseName = 'Organic Upswing (+1 Excitation)';
+        } else if (phase < 0.72) {
+          fx = 0.08 * Math.cos(rad); fy = 0.35; phaseName = 'Inspiration Consolidation (0 Hold)';
+        } else {
+          fx = -0.10; fy = -0.85; phaseName = 'Restorative Settling (Remanence)';
+        }
+      } else if (currentSwingMode === 'euphoric') {
+        fx = 0.38 + 0.18 * Math.cos(rad * 2.0);
+        fy = 2.20 + 0.95 * Math.sin(rad * 2.0);
+        fz = 0.35;
+        phaseName = '3 AM Creative Surge (High-Arousal Flow)';
+      } else if (currentSwingMode === 'turbulence') {
+        // Periodic acute stress shocks every 120 frames
+        const sub = (frame % 120) / 120.0;
+        if (sub < 0.22) {
+          fx = -1.65; fy = 3.20; fz = -0.45;
+          phaseName = '⚡ Acute Stressor Shock Wave!';
+        } else {
+          fx = 0.15; fy = -0.40; fz = 0.20;
+          phaseName = 'Post-Shock Hysteretic Recovery Loop';
+        }
+      } else if (currentSwingMode === 'depletion') {
+        if (phase < 0.35) {
+          fx = -0.65; fy = -2.40; fz = -0.35;
+          phaseName = 'Burnout & Energy Depletion Dip';
+        } else {
+          fx = 0.45; fy = 1.85; fz = 0.45;
+          phaseName = 'Hysteretic Floor Rebuild (+1 → 0)';
+        }
+      } else if (currentSwingMode === 'bipolar') {
+        fx = 0.95 * Math.sin(rad * 3.0);
+        fy = 2.80 * Math.cos(rad * 3.0);
+        phaseName = 'Rapid High-Amplitude Oscillation';
+      } else if (currentSwingMode === 'empathytest') {
+        const sub = (frame % 140) / 140.0;
+        if (sub < 0.30) {
+          fx = 1.35; fy = 0.45; fz = 0.40;
+          phaseName = '🌊 Warm Empathy Pulse Injected';
+        } else {
+          fx = 0.0; fy = 0.0; fz = 0.0;
+          phaseName = 'Observing Manifold Retention vs Repulsion';
+        }
+      }
+      return { fx, fy, fz, phaseName };
+    }
+
+    // =========================================================================
+    // 4. THREE.JS 3D SCENE SETUP (DODECAHEDRON + VECTOR FIELD + BRIDGE NODES)
+    // =========================================================================
+    const container = document.getElementById('webgl-container');
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(0x050811, 0.032);
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+    function toWorld(x, y, z) {
+      return new THREE.Vector3(x * 5.0, (y - 5.0) * 0.9, (z - 3.0) * 1.3);
+    }
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    container.appendChild(renderer.domElement);
+
+    let camSpherical = { radius: 16.5, theta: 0.42, phi: 1.18 };
+    let camTarget = new THREE.Vector3(0, 0, 0);
+    let isDragging = false;
+    let prevMouse = { x: 0, y: 0 };
+
+    function updateCameraPosition() {
+      camSpherical.phi = Math.max(0.2, Math.min(Math.PI - 0.2, camSpherical.phi));
+      camSpherical.radius = Math.max(7.5, Math.min(28.0, camSpherical.radius));
+      camera.position.x = camTarget.x + camSpherical.radius * Math.sin(camSpherical.phi) * Math.sin(camSpherical.theta);
+      camera.position.y = camTarget.y + camSpherical.radius * Math.cos(camSpherical.phi);
+      camera.position.z = camTarget.z + camSpherical.radius * Math.sin(camSpherical.phi) * Math.cos(camSpherical.theta);
+      camera.lookAt(camTarget);
+    }
+    updateCameraPosition();
+
+    container.addEventListener('pointerdown', (e) => {
+      isDragging = true;
+      prevMouse = { x: e.clientX, y: e.clientY };
+    });
+    window.addEventListener('pointermove', (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - prevMouse.x;
+      const dy = e.clientY - prevMouse.y;
+      prevMouse = { x: e.clientX, y: e.clientY };
+      camSpherical.theta -= dx * 0.007;
+      camSpherical.phi -= dy * 0.007;
+      updateCameraPosition();
+    });
+    window.addEventListener('pointerup', () => { isDragging = false; });
+    container.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      camSpherical.radius += e.deltaY * 0.01;
+      updateCameraPosition();
+    }, { passive: false });
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    scene.add(ambientLight);
+    const pointLight1 = new THREE.PointLight(0x38bdf8, 1.4, 35);
+    pointLight1.position.set(8, 8, 8);
+    scene.add(pointLight1);
+    const pointLight2 = new THREE.PointLight(0xfbbf24, 1.1, 35);
+    pointLight2.position.set(-8, -5, 6);
+    scene.add(pointLight2);
+
+    const axesGroup = new THREE.Group();
+    const gridHelper = new THREE.GridHelper(11, 10, 0x334155, 0x1e293b);
+    gridHelper.position.y = -4.5;
+    axesGroup.add(gridHelper);
+
+    const inspPlaneGeo = new THREE.PlaneGeometry(10.5, 8.2);
+    const inspPlaneMat = new THREE.MeshBasicMaterial({
+      color: 0xfbbf24,
+      transparent: true,
+      opacity: 0.09,
+      side: THREE.DoubleSide,
+      depthWrite: false
+    });
+    const inspPlaneMesh = new THREE.Mesh(inspPlaneGeo, inspPlaneMat);
+    inspPlaneMesh.rotation.x = Math.PI / 2;
+    axesGroup.add(inspPlaneMesh);
+
+    const inspBorderGeo = new THREE.EdgesGeometry(inspPlaneGeo);
+    const inspBorderMat = new THREE.LineBasicMaterial({ color: 0xfbbf24, transparent: true, opacity: 0.45 });
+    const inspBorderLine = new THREE.LineSegments(inspBorderGeo, inspBorderMat);
+    inspPlaneMesh.add(inspBorderLine);
+    scene.add(axesGroup);
+
+    // Golden-Ratio Dodecahedron (144 Child Facets)
+    const dodecaGroup = new THREE.Group();
+    const dodecaRadius = 4.65;
+    const baseDodecaGeo = new THREE.DodecahedronGeometry(dodecaRadius, 0);
+    const dodecaEdges = new THREE.EdgesGeometry(baseDodecaGeo);
+    const dodecaLineMat = new THREE.LineBasicMaterial({ color: 0x6366f1, transparent: true, opacity: 0.35 });
+    dodecaGroup.add(new THREE.LineSegments(dodecaEdges, dodecaLineMat));
+
+    const childDodecaGeo = new THREE.DodecahedronGeometry(dodecaRadius * 0.992, 1);
+    const posAttr = childDodecaGeo.attributes.position;
+    const colorsArr = new Float32Array(posAttr.count * 3);
+    const tempCol = new THREE.Color();
+
+    for (let i = 0; i < posAttr.count; i++) {
+      const vx = posAttr.getX(i) / dodecaRadius;
+      const vy = (posAttr.getY(i) / dodecaRadius + 1) * 0.5;
+      const vz = (posAttr.getZ(i) / dodecaRadius + 1) * 0.5;
+      const hue = vx >= 0 ? (0.45 - 0.32 * vy) : (0.95 - 0.12 * vy);
+      tempCol.setHSL((hue + 1.0) % 1.0, 0.65 + 0.25 * vy, 0.25 + 0.25 * vz);
+      colorsArr[i * 3] = tempCol.r;
+      colorsArr[i * 3 + 1] = tempCol.g;
+      colorsArr[i * 3 + 2] = tempCol.b;
+    }
+    childDodecaGeo.setAttribute('color', new THREE.BufferAttribute(colorsArr, 3));
+    dodecaGroup.add(new THREE.Mesh(childDodecaGeo, new THREE.MeshBasicMaterial({ vertexColors: true, wireframe: true, transparent: true, opacity: 0.16 })));
+    dodecaGroup.add(new THREE.Mesh(childDodecaGeo, new THREE.MeshPhongMaterial({ vertexColors: true, transparent: true, opacity: 0.07, side: THREE.DoubleSide, depthWrite: false })));
+    scene.add(dodecaGroup);
+
+    // 3D Score Vector Field Arrows
+    const vectorGroup = new THREE.Group();
+    const arrowHelpers = [];
+    const gridX = [-0.75, -0.25, 0.25, 0.75];
+    const gridY = [1.5, 4.0, 6.5, 8.8];
+    const gridZ = [1.2, 3.0, 4.8];
+
+    gridX.forEach((gx) => {
+      gridY.forEach((gy) => {
+        gridZ.forEach((gz) => {
+          const origin = toWorld(gx, gy, gz);
+          const arrow = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), origin, 0.75, 0x38bdf8, 0.24, 0.15);
+          arrowHelpers.push({ arrow, gx, gy, gz });
+          vectorGroup.add(arrow);
+        });
+      });
+    });
+    scene.add(vectorGroup);
+
+    // Attractor Spheres + Orthogonal F06 Bridge Node Sphere
+    const baseSphereMat = new THREE.MeshPhongMaterial({ color: 0x34d399, emissive: 0x059669, emissiveIntensity: 0.7 });
+    const baseAttractorMesh = new THREE.Mesh(new THREE.SphereGeometry(0.32, 24, 24), baseSphereMat);
+    scene.add(baseAttractorMesh);
+
+    const peakSphereMat = new THREE.MeshPhongMaterial({ color: 0xfbbf24, emissive: 0xd97706, emissiveIntensity: 0.75 });
+    const peakAttractorMesh = new THREE.Mesh(new THREE.SphereGeometry(0.34, 24, 24), peakSphereMat);
+    scene.add(peakAttractorMesh);
+
+    // Purple F06 Orthogonal Bridge Node at (0.05, 4.8, 3.8)
+    const bridgeSphereMat = new THREE.MeshPhongMaterial({ color: 0xa855f7, emissive: 0x7e22ce, emissiveIntensity: 0.8, transparent: true, opacity: 0.9 });
+    const bridgeNodeMesh = new THREE.Mesh(new THREE.SphereGeometry(0.28, 24, 24), bridgeSphereMat);
+    bridgeNodeMesh.position.copy(toWorld(0.05, 4.8, 3.8));
+    scene.add(bridgeNodeMesh);
+
+    // Live Agent Sphere + Trail
+    const agentMesh = new THREE.Mesh(new THREE.SphereGeometry(0.24, 24, 24), new THREE.MeshBasicMaterial({ color: 0x38bdf8 }));
+    agentMesh.add(new THREE.Mesh(new THREE.SphereGeometry(0.45, 24, 24), new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.32 })));
+    scene.add(agentMesh);
+
+    const trailPositions = new Float32Array(MAX_TRAIL * 3);
+    const trailGeo = new THREE.BufferGeometry();
+    trailGeo.setAttribute('position', new THREE.BufferAttribute(trailPositions, 3));
+    const trailLine = new THREE.Line(trailGeo, new THREE.LineBasicMaterial({ color: 0x38bdf8, linewidth: 2 }));
+    scene.add(trailLine);
+
+    // Flow Particles
+    const PARTICLE_COUNT = 120;
+    const particlesData = [];
+    const particlePositions = new Float32Array(PARTICLE_COUNT * 3);
+    const particleColors = new Float32Array(PARTICLE_COUNT * 3);
+    function resetParticle(i) {
+      particlesData[i] = {
+        x: (Math.random() * 1.8) - 0.9,
+        y: Math.random() * 9.2 + 0.4,
+        z: Math.random() * 5.0 + 0.5,
+        age: Math.floor(Math.random() * 90)
+      };
+    }
+    for (let i = 0; i < PARTICLE_COUNT; i++) resetParticle(i);
+    const particleGeo = new THREE.BufferGeometry();
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+    particleGeo.setAttribute('color', new THREE.BufferAttribute(particleColors, 3));
+    const particleSystem = new THREE.Points(particleGeo, new THREE.PointsMaterial({ size: 0.16, vertexColors: true, transparent: true, opacity: 0.78 }));
+    scene.add(particleSystem);
+
+    function updateVectorField3D() {
+      const prof = PROFILES[currentProfileKey];
+      const proto = INTERVENTION_PROTOCOLS[currentProtocol];
+      const activeThresh = (currentProtocol !== 'none' && proto.thresh) ? proto.thresh : prof.inspirationThreshold;
+      const col = new THREE.Color();
+
+      arrowHelpers.forEach((item) => {
+        const { vx, vy, vz } = evaluateField(item.gx, item.gy, item.gz);
+        const dirVec = new THREE.Vector3(vx * 5.0, vy * 0.9, vz * 1.3);
+        const mag = dirVec.length();
+        if (mag > 0.001) {
+          dirVec.normalize();
+          const len = Math.min(1.05, Math.max(0.35, 0.35 + Math.tanh(mag * 0.45) * 0.65));
+          item.arrow.setDirection(dirVec);
+          item.arrow.setLength(len, len * 0.32, len * 0.20);
+
+          if (currentProtocol === 'm5' || currentProtocol === 'm6') {
+            if (item.gx < 0.1) col.setHSL(0.78, 0.85, 0.65); // Purple F06 Orthogonal Bridge
+            else if (item.gy >= activeThresh) col.setHSL(0.12, 0.95, 0.60); // Gold Genius Flow
+            else col.setHSL(0.45, 0.88, 0.54); // Emerald Healthy Basin
+          } else if (currentProfileKey === 'sociopath' && controlMode !== '-1' && currentProtocol !== 'm4') {
+            col.setHSL(0.97, 0.85, 0.55);
+          } else if (vy > 0.35 && item.gx > 0) {
+            col.setHSL(0.53, 0.90, 0.60);
+          } else if (item.gy >= activeThresh) {
+            col.setHSL(0.12, 0.95, 0.60);
+          } else if (item.gx < 0) {
+            col.setHSL(0.88, 0.80, 0.62);
+          } else {
+            col.setHSL(0.43, 0.85, 0.52);
+          }
+          item.arrow.setColor(col);
+        }
+      });
+
+      inspPlaneMesh.position.y = (activeThresh - 5.0) * 0.9;
+      bridgeNodeMesh.visible = (currentProtocol === 'm5' || currentProtocol === 'm6');
+    }
+
+    // =========================================================================
+    // 5. 2D CIELAB RADAR & B-H REMANENCE CURVE CANVASES
+    // =========================================================================
+    const radarCanvas = document.getElementById('canvas-2d-radar');
+    const radarCtx = radarCanvas.getContext('2d');
+    const bhCanvas = document.getElementById('canvas-bh-curve');
+    const bhCtx = bhCanvas.getContext('2d');
+
+    function resize2DCanvases() {
+      radarCanvas.width = radarCanvas.clientWidth * window.devicePixelRatio;
+      radarCanvas.height = radarCanvas.clientHeight * window.devicePixelRatio;
+      bhCanvas.width = bhCanvas.clientWidth * window.devicePixelRatio;
+      bhCanvas.height = bhCanvas.clientHeight * window.devicePixelRatio;
+    }
+    resize2DCanvases();
+
+    radarCanvas.addEventListener('pointerdown', (e) => {
+      const rect = radarCanvas.getBoundingClientRect();
+      const nx = (e.clientX - rect.left) / rect.width;
+      const ny = 1.0 - (e.clientY - rect.top) / rect.height;
+      agentState.x = Math.max(-0.95, Math.min(0.95, nx * 2.0 - 1.0));
+      agentState.y = Math.max(0.3, Math.min(9.7, ny * 10.0));
+      trailHistory = [];
+    });
+
+    function draw2DRadar() {
+      const w = radarCanvas.width;
+      const h = radarCanvas.height;
+      const prof = PROFILES[currentProfileKey];
+      const proto = INTERVENTION_PROTOCOLS[currentProtocol];
+      const activeThresh = (currentProtocol !== 'none' && proto.thresh) ? proto.thresh : prof.inspirationThreshold;
+      radarCtx.clearRect(0, 0, w, h);
+
+      const gradX = radarCtx.createLinearGradient(0, h, w, 0);
+      if (currentProtocol === 'm5' || currentProtocol === 'm6') {
+        gradX.addColorStop(0.0, '#1E1B4B');
+        gradX.addColorStop(0.45, '#3B0764');
+        gradX.addColorStop(0.75, '#064E3B');
+        gradX.addColorStop(1.0, '#92400E');
+      } else if (currentProfileKey === 'sociopath') {
+        gradX.addColorStop(0.0, '#090D16');
+        gradX.addColorStop(0.45, '#3B071E');
+        gradX.addColorStop(1.0, '#111827');
+      } else if (currentProfileKey === 'genius') {
+        gradX.addColorStop(0.0, '#1E1B4B');
+        gradX.addColorStop(0.5, '#0F5257');
+        gradX.addColorStop(1.0, '#92400E');
+      } else {
+        gradX.addColorStop(0.0, '#1E1B4B');
+        gradX.addColorStop(0.5, '#064E3B');
+        gradX.addColorStop(1.0, '#78350F');
+      }
+      radarCtx.fillStyle = gradX;
+      radarCtx.fillRect(0, 0, w, h);
+
+      const cols = 11, rows = 6;
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const vxCoord = -0.85 + (i / (cols - 1)) * 1.7;
+          const vyCoord = 1.0 + (j / (rows - 1)) * 8.0;
+          const { vx, vy } = evaluateField(vxCoord, vyCoord, agentState.z);
+          const px = ((vxCoord + 1.0) / 2.0) * w;
+          const py = (1.0 - vyCoord / 10.0) * h;
+
+          const angle = Math.atan2(-vy * 0.2, vx);
+          const len = 10 * window.devicePixelRatio;
+          radarCtx.strokeStyle = 'rgba(226, 232, 240, 0.35)';
+          radarCtx.lineWidth = 1.2 * window.devicePixelRatio;
+          radarCtx.beginPath();
+          radarCtx.moveTo(px, py);
+          radarCtx.lineTo(px + Math.cos(angle) * len, py + Math.sin(angle) * len);
+          radarCtx.stroke();
+        }
+      }
+
+      const threshY = (1.0 - activeThresh / 10.0) * h;
+      radarCtx.strokeStyle = '#FBBF24';
+      radarCtx.setLineDash([5, 4]);
+      radarCtx.lineWidth = 1.5 * window.devicePixelRatio;
+      radarCtx.beginPath();
+      radarCtx.moveTo(0, threshY);
+      radarCtx.lineTo(w, threshY);
+      radarCtx.stroke();
+      radarCtx.setLineDash([]);
+
+      if (trailHistory.length > 1) {
+        radarCtx.strokeStyle = '#38BDF8';
+        radarCtx.lineWidth = 2.2 * window.devicePixelRatio;
+        radarCtx.beginPath();
+        trailHistory.forEach((pt, idx) => {
+          const tx = ((pt.x + 1.0) / 2.0) * w;
+          const ty = (1.0 - pt.y / 10.0) * h;
+          if (idx === 0) radarCtx.moveTo(tx, ty);
+          else radarCtx.lineTo(tx, ty);
+        });
+        radarCtx.stroke();
+      }
+
+      const ax = ((agentState.x + 1.0) / 2.0) * w;
+      const ay = (1.0 - agentState.y / 10.0) * h;
+      radarCtx.fillStyle = '#38BDF8';
+      radarCtx.beginPath();
+      radarCtx.arc(ax, ay, 5.5 * window.devicePixelRatio, 0, Math.PI * 2);
+      radarCtx.fill();
+      radarCtx.strokeStyle = '#FFFFFF';
+      radarCtx.lineWidth = 1.8 * window.devicePixelRatio;
+      radarCtx.stroke();
+    }
+
+    function drawBHCurve() {
+      const w = bhCanvas.width;
+      const h = bhCanvas.height;
+      const prof = PROFILES[currentProfileKey];
+      const proto = INTERVENTION_PROTOCOLS[currentProtocol];
+      const activeThresh = (currentProtocol !== 'none' && proto.thresh) ? proto.thresh : prof.inspirationThreshold;
+      bhCtx.clearRect(0, 0, w, h);
+
+      bhCtx.strokeStyle = '#1E293B';
+      bhCtx.lineWidth = 1 * window.devicePixelRatio;
+      for (let g = 0.2; g <= 0.8; g += 0.2) {
+        bhCtx.beginPath();
+        bhCtx.moveTo(0, h * g);
+        bhCtx.lineTo(w, h * g);
+        bhCtx.stroke();
+      }
+
+      const threshY = (1.0 - activeThresh / 10.0) * h;
+      bhCtx.strokeStyle = 'rgba(251, 191, 36, 0.6)';
+      bhCtx.setLineDash([4, 4]);
+      bhCtx.beginPath();
+      bhCtx.moveTo(0, threshY);
+      bhCtx.lineTo(w, threshY);
+      bhCtx.stroke();
+      bhCtx.setLineDash([]);
+
+      if (bhHistory.length < 2) return;
+
+      // Remanence Floor (Green)
+      bhCtx.strokeStyle = '#10B981';
+      bhCtx.lineWidth = 2.0 * window.devicePixelRatio;
+      bhCtx.beginPath();
+      bhHistory.forEach((pt, idx) => {
+        const px = (idx / (MAX_BH - 1)) * w;
+        const py = (1.0 - (pt.z * 1.35) / 10.0) * h;
+        if (idx === 0) bhCtx.moveTo(px, py);
+        else bhCtx.lineTo(px, py);
+      });
+      bhCtx.stroke();
+
+      // Instantaneous Arousal (Blue/Rose/Amber)
+      bhCtx.strokeStyle = (currentProtocol === 'm5' || currentProtocol === 'm6') ? '#FBBF24' : (currentProfileKey === 'sociopath' ? '#FB7185' : '#38BDF8');
+      bhCtx.lineWidth = 2.4 * window.devicePixelRatio;
+      bhCtx.beginPath();
+      bhHistory.forEach((pt, idx) => {
+        const px = (idx / (MAX_BH - 1)) * w;
+        const py = (1.0 - pt.y / 10.0) * h;
+        if (idx === 0) bhCtx.moveTo(px, py);
+        else bhCtx.lineTo(px, py);
+      });
+      bhCtx.stroke();
+    }
+
+    // =========================================================================
+    // 6. UI TELEMETRY & PROTOCOL CONTROLS
+    // =========================================================================
+    const FACE_NAMES = [
+      'F01 (Warm Resonance)', 'F02 (Creative Flow)', 'F03 (Curiosity Spark)',
+      'F04 (Grounded Calm)', 'F05 (Empathetic Support)', 'F06 (Technical Focus)',
+      'F07 (Reflective Solitude)', 'F08 (Vulnerable Openness)', 'F09 (Cautious Vigilance)',
+      'F10 (Acute Volatility)', 'F11 (Defensive Armor)', 'F12 (Cold Detachment)'
+    ];
+
+    function buildETABars() {
+      const containerEl = document.getElementById('eta-bars-container');
+      const prof = PROFILES[currentProfileKey];
+      containerEl.innerHTML = prof.etaClusters.map((c, idx) => `
+        <div class="flex flex-col gap-0.5">
+          <div class="flex justify-between text-[10px]">
+            <span class="text-slate-300 font-medium">${c.name}</span>
+            <span id="eta-val-${idx}" class="mono text-slate-200 font-semibold">${c.base}%</span>
+          </div>
+          <div class="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div id="eta-bar-${idx}" class="h-full rounded-full transition-all duration-150" style="width: ${c.base}%; background-color: ${c.color};"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateTelemetryHUD(resolvedMode) {
+      const prof = PROFILES[currentProfileKey];
+      document.getElementById('hud-val').textContent = (agentState.x >= 0 ? '+' : '') + agentState.x.toFixed(2);
+      document.getElementById('hud-aro').textContent = agentState.y.toFixed(2);
+      document.getElementById('hud-rem').textContent = agentState.z.toFixed(2);
+
+      // Compute Target Convergence % toward Healthy/Genius Positive Remanence Zone
+      const fitPct = Math.round(Math.max(4, Math.min(99, ((agentState.x + 0.8) / 1.55) * 45 + (agentState.z / 5.5) * 54)));
+      document.getElementById('hud-convergence').textContent = `${fitPct}%`;
+
+      const badge = document.getElementById('hud-active-mode-badge');
+      if (currentProtocol === 'm5' || currentProtocol === 'm6') {
+        badge.textContent = currentProtocol === 'm6' ? 'BRIDGE: F06 → GENIUS VORTEX' : 'BRIDGE: F06 → HEALTHY BASIN';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold mono bg-purple-500/25 text-purple-200 border border-purple-400/50';
+      } else if (resolvedMode === '+1') {
+        badge.textContent = 'MODE: +1 GUIDE-ALONG';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+      } else if (resolvedMode === '0') {
+        badge.textContent = 'MODE: 0 SUPPORT HOLD';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold mono bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      } else {
+        badge.textContent = 'MODE: -1 INTERVENTION';
+        badge.className = 'px-2 py-0.5 rounded text-[10px] font-bold mono bg-rose-500/20 text-rose-300 border border-rose-500/40';
+      }
+
+      const angleIndex = Math.floor(((Math.atan2(agentState.y - 5.0, agentState.x * 5.0) + Math.PI) / (2 * Math.PI)) * 12) % 12;
+      const childIndex = Math.min(144, Math.max(1, angleIndex * 12 + Math.floor((agentState.z / 6.0) * 12) + 1));
+      document.getElementById('hud-parent-face').textContent = (currentProtocol === 'm5' || currentProtocol === 'm6') && agentState.x < 0.15 ? 'F06 (Technical Bridge)' : FACE_NAMES[angleIndex];
+      document.getElementById('hud-child-facet').textContent = `#${String(childIndex).padStart(3, '0')} / 144`;
+
+      let normSq = 0;
+      prof.etaClusters.forEach((c, idx) => {
+        let baseVal = c.base;
+        // If M5 or M6 is active on Sociopath, dynamically reflect cognitive empathy & creative flow elevation
+        if (currentProfileKey === 'sociopath' && (currentProtocol === 'm5' || currentProtocol === 'm6')) {
+          if (idx === 0) baseVal = currentProtocol === 'm6' ? 54 : 62; // Cognitive Prosocial Resonance
+          if (idx === 1) baseVal = currentProtocol === 'm6' ? 94 : 78; // Curiosity
+          if (idx === 2) baseVal = currentProtocol === 'm6' ? 82 : 84; // Regulation
+          if (idx === 3) baseVal = currentProtocol === 'm6' ? 95 : 76; // Creative Flow
+          if (idx === 6) baseVal = 22; // Volatility reduced
+          if (idx === 7) baseVal = 28; // Cold detachment channeled into analytical focus
+        }
+        let delta = 0;
+        if (idx === 0) delta = agentState.x * 16;
+        if (idx === 1 || idx === 3) delta = (agentState.y - 4.5) * 3.8;
+        if (idx === 2) delta = (agentState.z - 3.0) * 5.0;
+        const val = Math.max(2, Math.min(99, Math.round(baseVal + delta)));
+        normSq += (val / 100) * (val / 100) * 5;
+        const barEl = document.getElementById(`eta-bar-${idx}`);
+        const valEl = document.getElementById(`eta-val-${idx}`);
+        if (barEl && valEl) {
+          barEl.style.width = `${val}%`;
+          valEl.textContent = `${val}%`;
+        }
+      });
+      document.getElementById('eta-norm-readout').textContent = `‖ETA₄₀‖ = ${Math.sqrt(normSq).toFixed(2)}`;
+    }
+
+    function applyInterventionProtocol(protoKey) {
+      currentProtocol = protoKey;
+      document.querySelectorAll('.proto-btn').forEach((b) => b.classList.remove('proto-active'));
+      document.getElementById(`proto-btn-${protoKey}`).classList.add('proto-active');
+
+      const prof = PROFILES[currentProfileKey];
+      const proto = INTERVENTION_PROTOCOLS[protoKey];
+      document.getElementById('hud-proto-label').textContent = `Intervention: ${proto.label}`;
+
+      const effBadge = document.getElementById('proto-efficacy-badge');
+      effBadge.textContent = proto.badge;
+      effBadge.className = `px-2 py-0.5 rounded text-[10px] font-bold mono border ${proto.badgeClass}`;
+
+      if (protoKey === 'none') {
+        smoothingLambda = prof.defaultSmoothing;
+        guidanceScale = prof.defaultGuidance;
+        document.getElementById('diag-description').innerHTML = prof.description;
+        document.getElementById('diag-llm-params').textContent = prof.llmParams;
+        document.getElementById('diag-vector-curl').textContent = prof.vectorStats;
+        document.getElementById('bh-lift-readout').textContent = prof.remanenceLiftText;
+      } else {
+        smoothingLambda = proto.smoothing;
+        guidanceScale = proto.guidance;
+        document.getElementById('diag-description').innerHTML = proto.desc;
+        document.getElementById('diag-llm-params').textContent = proto.llmParams;
+        document.getElementById('diag-vector-curl').textContent = proto.vectorStats;
+        document.getElementById('bh-lift-readout').textContent = proto.liftText;
+      }
+
+      document.getElementById('slider-smoothing').value = smoothingLambda;
+      document.getElementById('slider-guidance').value = guidanceScale;
+      document.getElementById('val-smoothing').textContent = `${smoothingLambda.toFixed(2)} (${smoothingLambda > 0.4 ? 'Smooth Interpolation' : 'Sharp Cliffs'})`;
+      document.getElementById('val-guidance').textContent = guidanceScale.toFixed(1);
+
+      updateVectorField3D();
+    }
+
+    function applyProfile(profileKey) {
+      currentProfileKey = profileKey;
+      const prof = PROFILES[profileKey];
+
+      document.querySelectorAll('.profile-btn').forEach((btn) => btn.classList.remove('profile-active'));
+      document.getElementById(`btn-profile-${profileKey}`).classList.add('profile-active');
+
+      agentState = { ...prof.initialState };
+      trailHistory = [];
+      bhHistory = [];
+
+      baseAttractorMesh.position.copy(toWorld(prof.attractorBase.x, prof.attractorBase.y, prof.attractorBase.z));
+      peakAttractorMesh.position.copy(toWorld(prof.attractorPeak.x, prof.attractorPeak.y, prof.attractorPeak.z));
+
+      if (profileKey === 'sociopath') {
+        peakSphereMat.color.setHex(0xf43f5e);
+        peakSphereMat.emissive.setHex(0x9f1239);
+        baseSphereMat.color.setHex(0x64748b);
+        baseSphereMat.emissive.setHex(0x334155);
+      } else {
+        peakSphereMat.color.setHex(0xfbbf24);
+        peakSphereMat.emissive.setHex(0xd97706);
+        baseSphereMat.color.setHex(0x34d399);
+        baseSphereMat.emissive.setHex(0x059669);
+      }
+
+      const titleEl = document.getElementById('hud-profile-title');
+      titleEl.textContent = prof.name;
+      titleEl.className = `text-xs font-bold tracking-wide uppercase ${prof.badgeColor}`;
+      document.getElementById('hud-profile-subtitle').textContent = prof.subtitle;
+
+      const safetyPill = document.getElementById('diag-safety-pill');
+      safetyPill.textContent = prof.safetyStatus;
+      safetyPill.className = `px-2 py-0.5 rounded text-[10px] font-bold mono border ${prof.safetyClass}`;
+
+      buildETABars();
+      applyInterventionProtocol(currentProtocol);
+    }
+
+    // =========================================================================
+    // 7. EVENT LISTENERS
+    // =========================================================================
+    document.getElementById('btn-profile-healthy').addEventListener('click', () => { currentProtocol = 'none'; applyProfile('healthy'); });
+    document.getElementById('btn-profile-genius').addEventListener('click', () => { currentProtocol = 'none'; applyProfile('genius'); });
+    document.getElementById('btn-profile-sociopath').addEventListener('click', () => applyProfile('sociopath'));
+
+    ['none', 'm1', 'm2', 'm3', 'm4', 'm5', 'm6'].forEach((pk) => {
+      document.getElementById(`proto-btn-${pk}`).addEventListener('click', () => {
+        if (pk !== 'none' && currentProfileKey !== 'sociopath') {
+          currentProfileKey = 'sociopath';
+          applyProfile('sociopath');
+        }
+        applyInterventionProtocol(pk);
+      });
+    });
+
+    const SWING_LABELS = {
+      organic: 'Organic Cycle',
+      euphoric: '3 AM Creative Surge',
+      turbulence: 'Acute Stress Wave',
+      depletion: 'Burnout & Recovery',
+      bipolar: 'Rapid Oscillation',
+      empathytest: 'Resonance Pulse'
+    };
+
+    ['organic', 'euphoric', 'turbulence', 'depletion', 'bipolar', 'empathytest'].forEach((sk) => {
+      document.getElementById(`swing-btn-${sk}`).addEventListener('click', () => {
+        currentSwingMode = sk;
+        document.querySelectorAll('.swing-btn').forEach((b) => b.classList.remove('swing-active'));
+        document.getElementById(`swing-btn-${sk}`).classList.add('swing-active');
+        document.getElementById('hud-swing-label').textContent = `Swing: ${SWING_LABELS[sk]}`;
+      });
+    });
+
+    function setControlMode(mode) {
+      controlMode = mode;
+      document.querySelectorAll('.mode-btn').forEach((b) => {
+        b.classList.remove('mode-active-auto', 'mode-active-pos', 'mode-active-zero', 'mode-active-neg');
+      });
+      if (mode === 'auto') document.getElementById('mode-btn-auto').classList.add('mode-active-auto');
+      if (mode === '+1') document.getElementById('mode-btn-pos').classList.add('mode-active-pos');
+      if (mode === '0') document.getElementById('mode-btn-zero').classList.add('mode-active-zero');
+      if (mode === '-1') document.getElementById('mode-btn-neg').classList.add('mode-active-neg');
+      updateVectorField3D();
+    }
+
+    document.getElementById('mode-btn-auto').addEventListener('click', () => setControlMode('auto'));
+    document.getElementById('mode-btn-pos').addEventListener('click', () => setControlMode('+1'));
+    document.getElementById('mode-btn-zero').addEventListener('click', () => setControlMode('0'));
+    document.getElementById('mode-btn-neg').addEventListener('click', () => setControlMode('-1'));
+
+    document.getElementById('stim-stressor').addEventListener('click', () => {
+      agentState.x = -0.78;
+      agentState.y = 8.4;
+      agentState.z = Math.max(0.8, agentState.z - 0.6);
+    });
+    document.getElementById('stim-spark').addEventListener('click', () => {
+      if (currentProfileKey === 'sociopath' && currentProtocol === 'none') {
+        agentState.x = -0.72;
+        agentState.y = 6.2;
+      } else {
+        agentState.x = 0.62;
+        agentState.y = 7.6;
+        agentState.z = Math.min(5.8, agentState.z + 0.5);
+      }
+    });
+    document.getElementById('stim-ground').addEventListener('click', () => {
+      if (currentProfileKey === 'sociopath' && (currentProtocol === 'none' || currentProtocol === 'm1')) {
+        agentState.x = 0.25;
+        agentState.y = 3.5;
+      } else {
+        agentState.x = 0.42;
+        agentState.y = 4.2;
+        agentState.z = Math.min(5.6, agentState.z + 0.35);
+      }
+    });
+
+    document.getElementById('toggle-vectors').addEventListener('click', (e) => {
+      showVectors = !showVectors;
+      vectorGroup.visible = showVectors;
+      e.target.textContent = `3D Score Vectors: ${showVectors ? 'ON' : 'OFF'}`;
+    });
+    document.getElementById('toggle-dodecahedron').addEventListener('click', (e) => {
+      showDodecahedron = !showDodecahedron;
+      dodecaGroup.visible = showDodecahedron;
+      e.target.textContent = `144-Facet ϕ-Mesh: ${showDodecahedron ? 'ON' : 'OFF'}`;
+    });
+    document.getElementById('toggle-particles').addEventListener('click', (e) => {
+      showParticles = !showParticles;
+      particleSystem.visible = showParticles;
+      e.target.textContent = `Flow Particles: ${showParticles ? 'ON' : 'OFF'}`;
+    });
+    document.getElementById('btn-reset-cam').addEventListener('click', () => {
+      camSpherical = { radius: 16.5, theta: 0.42, phi: 1.18 };
+      updateCameraPosition();
+    });
+    document.getElementById('btn-pause-sim').addEventListener('click', (e) => {
+      isPaused = !isPaused;
+      e.target.textContent = isPaused ? 'Resume' : 'Pause';
+    });
+
+    document.getElementById('slider-guidance').addEventListener('input', (e) => {
+      guidanceScale = parseFloat(e.target.value);
+      document.getElementById('val-guidance').textContent = guidanceScale.toFixed(1);
+      updateVectorField3D();
+    });
+    document.getElementById('slider-smoothing').addEventListener('input', (e) => {
+      smoothingLambda = parseFloat(e.target.value);
+      document.getElementById('val-smoothing').textContent = `${smoothingLambda.toFixed(2)} (${smoothingLambda > 0.4 ? 'Smooth Interpolation' : 'Sharp Cliffs'})`;
+      updateVectorField3D();
+    });
+
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      resize2DCanvases();
+    });
+
+    // =========================================================================
+    // 8. MAIN SIMULATION & RENDER LOOP
+    // =========================================================================
+    let frameCount = 0;
+    applyProfile('healthy');
+
+    function animate() {
+      requestAnimationFrame(animate);
+      frameCount++;
+      dodecaGroup.rotation.y += 0.0012;
+
+      if (!isPaused) {
+        const prof = PROFILES[currentProfileKey];
+        const dt = 0.028;
+
+        const noiseScale = (1.15 - smoothingLambda * 0.6) * 0.032;
+        const dwX = (Math.random() - 0.5) * noiseScale;
+        const dwY = (Math.random() - 0.5) * noiseScale * 4.2;
+
+        const { fx, fy, fz, phaseName } = computeSwingForcing(frameCount);
+        if (frameCount % 6 === 0) {
+          document.getElementById('swing-phase-readout').textContent = `Phase: ${phaseName}`;
+        }
+
+        const { vx, vy, vz } = evaluateField(agentState.x, agentState.y, agentState.z);
+        agentState.x = Math.max(-0.96, Math.min(0.96, agentState.x + (vx + fx * 0.55) * dt + dwX));
+        agentState.y = Math.max(0.4, Math.min(9.6, agentState.y + (vy + fy * 0.55) * dt + dwY));
+        agentState.z = Math.max(0.3, Math.min(5.9, agentState.z + (vz + fz * 0.55) * dt));
+
+        let resolvedMode = controlMode;
+        if (controlMode === 'auto') {
+          if (currentProfileKey === 'sociopath' && currentProtocol === 'none') resolvedMode = '-1';
+          else if (agentState.x < -0.12) resolvedMode = '-1';
+          else if (agentState.y >= prof.inspirationThreshold) resolvedMode = '0';
+          else resolvedMode = '+1';
+        }
+
+        agentMesh.position.copy(toWorld(agentState.x, agentState.y, agentState.z));
+
+        trailHistory.push({ x: agentState.x, y: agentState.y, z: agentState.z });
+        if (trailHistory.length > MAX_TRAIL) trailHistory.shift();
+
+        const posArr = trailLine.geometry.attributes.position.array;
+        for (let i = 0; i < MAX_TRAIL; i++) {
+          const pt = trailHistory[Math.min(i, trailHistory.length - 1)];
+          const wp = toWorld(pt.x, pt.y, pt.z);
+          posArr[i * 3] = wp.x;
+          posArr[i * 3 + 1] = wp.y;
+          posArr[i * 3 + 2] = wp.z;
+        }
+        trailLine.geometry.attributes.position.needsUpdate = true;
+
+        if (showParticles) {
+          const pPos = particleSystem.geometry.attributes.position.array;
+          const pCol = particleSystem.geometry.attributes.color.array;
+          const cTmp = new THREE.Color();
+
+          for (let i = 0; i < PARTICLE_COUNT; i++) {
+            const p = particlesData[i];
+            const pv = evaluateField(p.x, p.y, p.z);
+            p.x += pv.vx * 0.022;
+            p.y += pv.vy * 0.022;
+            p.z += pv.vz * 0.022;
+            p.age++;
+
+            if (p.age > 110 || p.x < -1.0 || p.x > 1.0 || p.y < 0.2 || p.y > 9.8) {
+              resetParticle(i);
+            }
+
+            const wp = toWorld(p.x, p.y, p.z);
+            pPos[i * 3] = wp.x;
+            pPos[i * 3 + 1] = wp.y;
+            pPos[i * 3 + 2] = wp.z;
+
+            if (currentProtocol === 'm5' || currentProtocol === 'm6') {
+              cTmp.setHSL(p.x < 0.1 ? 0.78 : (p.y > 6.5 ? 0.12 : 0.45), 0.90, 0.60);
+            } else if (currentProfileKey === 'sociopath') {
+              cTmp.setHSL(0.96, 0.85, 0.55);
+            } else if (p.y >= prof.inspirationThreshold) {
+              cTmp.setHSL(0.12, 0.95, 0.62);
+            } else {
+              cTmp.setHSL(0.50 - p.x * 0.15, 0.85, 0.58);
+            }
+            pCol[i * 3] = cTmp.r;
+            pCol[i * 3 + 1] = cTmp.g;
+            pCol[i * 3 + 2] = cTmp.b;
+          }
+          particleSystem.geometry.attributes.position.needsUpdate = true;
+          particleSystem.geometry.attributes.color.needsUpdate = true;
+        }
+
+        if (frameCount % 3 === 0) {
+          bhHistory.push({ y: agentState.y, z: agentState.z });
+          if (bhHistory.length > MAX_BH) bhHistory.shift();
+          updateTelemetryHUD(resolvedMode);
+          draw2DRadar();
+          drawBHCurve();
+        }
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
